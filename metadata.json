@@ -1,0 +1,6 @@
+{
+  "name": "SmartFace AI",
+  "description": "Enterprise Face Recognition Attendance Management System",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

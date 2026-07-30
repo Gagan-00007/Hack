@@ -1,0 +1,53 @@
+{
+  "users": [
+    {
+      "id": "usr_admin_01",
+      "username": "admin",
+      "passwordHash": "829ad0fba5002320f2f9c42bfdf67ea7aeb6b19c897c9c03f6cf45ee6416a5a5",
+      "fullName": "System Administrator",
+      "email": "admin@smartface.ai",
+      "role": "ADMIN",
+      "department": "IT & Administration",
+      "createdAt": "2026-07-30T12:14:38.198Z"
+    },
+    {
+      "id": "usr_teacher_01",
+      "username": "teacher_smith",
+      "passwordHash": "af13a2fff090a8970999aa9808034bab79c6294ccff13e4f86348962d938ad49",
+      "fullName": "Prof. Sarah Smith",
+      "email": "ssmith@university.edu",
+      "role": "TEACHER",
+      "department": "Computer Science",
+      "createdAt": "2026-07-30T12:14:38.198Z"
+    }
+  ],
+  "students": [],
+  "attendance": [],
+  "auditLogs": [
+    {
+      "id": "log_001",
+      "timestamp": "2026-07-30T12:14:38.198Z",
+      "userId": "usr_admin_01",
+      "username": "admin",
+      "role": "ADMIN",
+      "action": "SYSTEM_INIT",
+      "details": "SmartFace AI Enterprise Database initialized securely.",
+      "ipAddress": "127.0.0.1"
+    }
+  ],
+  "settings": {
+    "darkMode": false,
+    "strictModeConfidence": 70,
+    "autoAttendanceIntervalSeconds": 3,
+    "kioskDeviceName": "Kiosk Terminal #1 (Main Entrance)",
+    "departmentList": [
+      "Computer Science",
+      "Electrical Engineering",
+      "Mechanical Engineering",
+      "Civil Engineering",
+      "Business Administration",
+      "Information Technology"
+    ],
+    "systemVersion": "SmartFace AI Enterprise v2.4.0"
+  }
+}
