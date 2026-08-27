@@ -8,7 +8,8 @@
       "email": "admin@smartface.ai",
       "role": "ADMIN",
       "department": "IT & Administration",
-      "createdAt": "2026-07-30T12:14:38.198Z"
+      "createdAt": "2026-07-30T12:14:38.198Z",
+      "lastLogin": "2026-08-27T15:09:07.800Z"
     },
     {
       "id": "usr_teacher_01",
@@ -24,6 +25,16 @@
   "students": [],
   "attendance": [],
   "auditLogs": [
+    {
+      "id": "log_1787843347801_hkby",
+      "timestamp": "2026-08-27T15:09:07.801Z",
+      "userId": "admin",
+      "username": "admin",
+      "role": "ADMIN",
+      "action": "LOGIN_SUCCESS",
+      "details": "User System Administrator logged in successfully",
+      "ipAddress": "127.0.0.1"
+    },
     {
       "id": "log_001",
       "timestamp": "2026-07-30T12:14:38.198Z",
