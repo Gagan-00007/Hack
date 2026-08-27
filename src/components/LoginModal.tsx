@@ -27,12 +27,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
         body: JSON.stringify({ username, password }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Invalid credentials');
+      let data;
+      const text = await res.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', text);
+        throw new Error(
+          res.ok 
+            ? 'Received invalid data from server.' 
+            : `Server error (${res.status}): The backend might not be running or is unreachable.`
+        );
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid credentials');
+      }
+
       onLoginSuccess(data.user, data.token);
     } catch (err: any) {
       setErrorMessage(err.message || 'Login failed. Check your username and password.');
