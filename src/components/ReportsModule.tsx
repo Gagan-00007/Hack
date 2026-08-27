@@ -83,10 +83,10 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({ userRole }) => {
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
             <FileSpreadsheet className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span>Corporate Attendance Reports & Export Hub</span>
+            <span>{userRole === 'STUDENT' ? 'My Attendance Reports & Export Hub' : 'Corporate Attendance Reports & Export Hub'}</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Generate executive attendance statements formatted for HR, university records, and compliance audits.
+            {userRole === 'STUDENT' ? 'Download your attendance history for reference or correction requests.' : 'Generate executive attendance statements formatted for HR, university records, and compliance audits.'}
           </p>
         </div>
 
@@ -140,28 +140,30 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({ userRole }) => {
               <option value="DAILY">Daily Attendance Statement</option>
               <option value="MONTHLY">Monthly Summary</option>
               <option value="YEARLY">Yearly Academic Audit</option>
-              <option value="DEPARTMENT">Department Specific Report</option>
+              {userRole !== 'STUDENT' && <option value="DEPARTMENT">Department Specific Report</option>}
             </select>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Department Scope
-            </label>
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-            >
-              <option value="ALL">All Departments</option>
-              <option>Computer Science</option>
-              <option>Electrical Engineering</option>
-              <option>Mechanical Engineering</option>
-              <option>Civil Engineering</option>
-              <option>Business Administration</option>
-              <option>Information Technology</option>
-            </select>
-          </div>
+          {userRole !== 'STUDENT' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Department Scope
+              </label>
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+              >
+                <option value="ALL">All Departments</option>
+                <option>Computer Science</option>
+                <option>Electrical Engineering</option>
+                <option>Mechanical Engineering</option>
+                <option>Civil Engineering</option>
+                <option>Business Administration</option>
+                <option>Information Technology</option>
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">

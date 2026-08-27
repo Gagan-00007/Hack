@@ -12,6 +12,9 @@ import { ReportsModule } from './components/ReportsModule';
 import { AnalyticsModule } from './components/AnalyticsModule';
 import { SettingsModule } from './components/SettingsModule';
 import { LoginModal } from './components/LoginModal';
+import { NotificationsModule } from './components/NotificationsModule';
+import { StudentProfileModule } from './components/StudentProfileModule';
+import { LeaveRequestModule } from './components/LeaveRequestModule';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -101,7 +104,13 @@ export default function App() {
 
           {activeTab === 'reports' && <ReportsModule userRole={currentUser.role} />}
 
-          {activeTab === 'analytics' && <AnalyticsModule />}
+          {activeTab === 'analytics' && currentUser.role !== 'STUDENT' && <AnalyticsModule />}
+          
+          {activeTab === 'notifications' && currentUser.role === 'STUDENT' && <NotificationsModule />}
+          
+          {activeTab === 'profile' && currentUser.role === 'STUDENT' && <StudentProfileModule />}
+          
+          {activeTab === 'requests' && currentUser.role === 'STUDENT' && <LeaveRequestModule />}
 
           {activeTab === 'settings' && currentUser.role === 'ADMIN' && (
             <SettingsModule

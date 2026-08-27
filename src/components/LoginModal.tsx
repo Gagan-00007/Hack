@@ -19,7 +19,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
       username: username || 'demo_user',
       fullName: activeRole === 'admin' ? 'Demo Administrator' : (activeRole === 'teacher' ? 'Prof. Sarah Smith' : 'Demo Student'),
       email: `${username || 'demo'}@smartface.ai`,
-      role: activeRole === 'admin' ? 'ADMIN' : 'TEACHER', // Fallback to TEACHER if not admin
+      role: activeRole === 'admin' ? 'ADMIN' : (activeRole === 'teacher' ? 'TEACHER' : 'STUDENT'),
       department: 'Computer Science',
       createdAt: new Date().toISOString(),
     };

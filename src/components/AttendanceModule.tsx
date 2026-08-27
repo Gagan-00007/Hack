@@ -64,7 +64,7 @@ export const AttendanceModule: React.FC<AttendanceModuleProps> = ({ userRole }) 
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
             <ClipboardList className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span>Attendance Audit Logs & Search Engine</span>
+            <span>{userRole === 'STUDENT' ? 'My Attendance History' : 'Attendance Audit Logs & Search Engine'}</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Real-time biometric attendance records with recognition confidence metrics and terminal details.
@@ -80,33 +80,37 @@ export const AttendanceModule: React.FC<AttendanceModuleProps> = ({ userRole }) 
       <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by student name or ID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-            />
-          </div>
+          {userRole !== 'STUDENT' && (
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search by student name or ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+              />
+            </div>
+          )}
 
           {/* Department Filter */}
-          <div>
-            <select
-              value={deptFilter}
-              onChange={(e) => setDeptFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-            >
-              <option value="ALL">All Departments</option>
-              <option>Computer Science</option>
-              <option>Electrical Engineering</option>
-              <option>Mechanical Engineering</option>
-              <option>Civil Engineering</option>
-              <option>Business Administration</option>
-              <option>Information Technology</option>
-            </select>
-          </div>
+          {userRole !== 'STUDENT' && (
+            <div>
+              <select
+                value={deptFilter}
+                onChange={(e) => setDeptFilter(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+              >
+                <option value="ALL">All Departments</option>
+                <option>Computer Science</option>
+                <option>Electrical Engineering</option>
+                <option>Mechanical Engineering</option>
+                <option>Civil Engineering</option>
+                <option>Business Administration</option>
+                <option>Information Technology</option>
+              </select>
+            </div>
+          )}
 
           {/* Status Filter */}
           <div>

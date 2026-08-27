@@ -13,6 +13,9 @@ import {
   ShieldCheck,
   ChevronRight,
   Database,
+  Bell,
+  UserCircle,
+  MessageSquareWarning,
 } from 'lucide-react';
 
 export type ActiveTab =
@@ -24,7 +27,10 @@ export type ActiveTab =
   | 'attendance'
   | 'reports'
   | 'analytics'
-  | 'settings';
+  | 'settings'
+  | 'notifications'
+  | 'profile'
+  | 'requests';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -46,7 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: ['ADMIN', 'TEACHER'],
+      roles: ['ADMIN', 'TEACHER', 'STUDENT'],
     },
     {
       id: 'recognition',
@@ -75,21 +81,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'attendance',
-      label: 'Attendance Records',
+      label: userRole === 'STUDENT' ? 'My Attendance' : 'Attendance Records',
       icon: ClipboardList,
-      roles: ['ADMIN', 'TEACHER'],
+      roles: ['ADMIN', 'TEACHER', 'STUDENT'],
+    },
+    {
+      id: 'requests',
+      label: 'Leave/Correction Request',
+      icon: MessageSquareWarning,
+      roles: ['STUDENT'],
     },
     {
       id: 'reports',
       label: 'Reports & Exports',
       icon: FileSpreadsheet,
-      roles: ['ADMIN', 'TEACHER'],
+      roles: ['ADMIN', 'TEACHER', 'STUDENT'],
     },
     {
       id: 'analytics',
       label: 'Analytics & Insights',
       icon: BarChart3,
       roles: ['ADMIN', 'TEACHER'],
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: Bell,
+      roles: ['STUDENT'],
+      badge: '3',
+    },
+    {
+      id: 'profile',
+      label: 'Face Enrollment',
+      icon: UserCircle,
+      roles: ['STUDENT'],
     },
     {
       id: 'settings',
@@ -150,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="capitalize">{userRole.toLowerCase()} Mode</span>
           </div>
           <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-            {userRole === 'ADMIN' ? 'Full Administrator Privileges' : 'Teacher Access Mode'}
+            {userRole === 'ADMIN' ? 'Full Administrator Privileges' : (userRole === 'TEACHER' ? 'Teacher Access Mode' : 'Restricted Student Access')}
           </p>
         </div>
       )}

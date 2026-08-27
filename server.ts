@@ -118,6 +118,22 @@ function addLog(db: any, username: string, role: any, action: string, details: s
   if (db.auditLogs.length > 500) db.auditLogs.pop(); // Keep last 500 logs
 }
 
+const activeSessions: Record<string, { id: string; role: string; username: string }> = {};
+
+const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  }
+  const token = authHeader.split(' ')[1];
+  const session = activeSessions[token];
+  if (!session) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
+  }
+  (req as any).user = session;
+  next();
+};
+
 // REST API ROUTES
 
 // Auth Login
@@ -129,25 +145,50 @@ app.post('/api/auth/login', (req, res) => {
 
   const db = getDB();
   const passHash = hashPassword(password);
-  const user = db.users.find((u: any) => u.username.toLowerCase() === username.toLowerCase() && u.passwordHash === passHash);
+  
+  let user = db.users.find((u: any) => u.username.toLowerCase() === username.toLowerCase() && u.passwordHash === passHash);
+
+  // Fallback check for students
+  if (!user) {
+    const student = db.students.find((s: any) => s.studentId.toLowerCase() === username.toLowerCase());
+    if (student && password === 'student123') { // hardcoded demo password for students
+      user = {
+        id: student.studentId,
+        username: student.studentId,
+        fullName: student.fullName,
+        email: student.email || `${student.studentId}@smartface.ai`,
+        role: 'STUDENT',
+        department: student.department,
+        createdAt: student.createdAt,
+      };
+    }
+  }
 
   if (!user) {
-    addLog(db, username, 'TEACHER', 'LOGIN_FAILED', `Failed login attempt for username: ${username}`, req.ip);
+    addLog(db, username, 'SYSTEM', 'LOGIN_FAILED', `Failed login attempt for username: ${username}`, req.ip);
     saveDB(db);
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  user.lastLogin = new Date().toISOString();
+  if (user.role !== 'STUDENT') {
+    const dbUser = db.users.find((u: any) => u.id === user.id);
+    if (dbUser) dbUser.lastLogin = new Date().toISOString();
+  }
+  
   addLog(db, user.username, user.role, 'LOGIN_SUCCESS', `User ${user.fullName} logged in successfully`, req.ip);
   saveDB(db);
 
+  const token = `token_${user.id}_${Date.now()}`;
+  activeSessions[token] = { id: user.id, role: user.role, username: user.username };
+
   // Return session user object (without password hash)
   const { passwordHash: _, ...safeUser } = user;
-  res.json({ token: `token_${user.id}_${Date.now()}`, user: safeUser });
+  res.json({ token, user: safeUser });
 });
 
 // Admin Password Reset
-app.post('/api/auth/reset-password', (req, res) => {
+app.post('/api/auth/reset-password', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const { targetUsername, newPassword, adminUsername } = req.body;
   const db = getDB();
 
@@ -164,9 +205,21 @@ app.post('/api/auth/reset-password', (req, res) => {
 });
 
 // Dashboard Stats
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', requireAuth, (req, res) => {
   const db = getDB();
+  const user = (req as any).user;
   const todayStr = new Date().toISOString().split('T')[0];
+
+  if (user.role === 'STUDENT') {
+    const studentRecords = db.attendance.filter((a: any) => a.studentId.toLowerCase() === user.id.toLowerCase());
+    const presentCount = studentRecords.filter((a: any) => a.status === 'PRESENT' || a.status === 'LATE').length;
+    const totalDays = Array.from(new Set(db.attendance.map((a: any) => a.date))).length || 1;
+    const attendancePercentage = Math.round((presentCount / totalDays) * 100);
+    return res.json({
+      totalStudents: 1, totalTeachers: 0, todayAttendanceCount: studentRecords.filter((a:any) => a.date === todayStr).length,
+      presentCount, absentCount: totalDays - presentCount, attendancePercentage, recentActivity: [], departmentStats: [], streak: presentCount
+    });
+  }
 
   const totalStudents = db.students.filter((s: any) => s.status === 'ACTIVE').length;
   const totalTeachers = db.users.filter((u: any) => u.role === 'TEACHER').length;
@@ -201,12 +254,21 @@ app.get('/api/stats', (req, res) => {
 });
 
 // Students List & Create / Edit / Delete
-app.get('/api/students', (req, res) => {
+app.get('/api/students/me', requireAuth, (req, res) => {
+  const db = getDB();
+  const student = db.students.find((s: any) => s.studentId.toLowerCase() === (req as any).user.id.toLowerCase());
+  if (!student) return res.status(404).json({ error: 'Not found' });
+  res.json(student);
+});
+
+app.get('/api/students', requireAuth, (req, res) => {
+  if ((req as any).user.role === 'STUDENT') return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   res.json(db.students);
 });
 
-app.post('/api/students', (req, res) => {
+app.post('/api/students', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const { studentId, fullName, department, year, section, rollNumber, email, phoneNumber, faceEncodings, datasetImages } = req.body;
 
   if (!studentId || !fullName || !department) {
@@ -244,7 +306,8 @@ app.post('/api/students', (req, res) => {
   res.status(201).json(newStudent);
 });
 
-app.put('/api/students/:id', (req, res) => {
+app.put('/api/students/:id', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const studentId = req.params.id;
   const db = getDB();
   const index = db.students.findIndex((s: any) => s.studentId.toLowerCase() === studentId.toLowerCase());
@@ -260,7 +323,8 @@ app.put('/api/students/:id', (req, res) => {
   res.json(db.students[index]);
 });
 
-app.delete('/api/students/:id', (req, res) => {
+app.delete('/api/students/:id', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const studentId = req.params.id;
   const db = getDB();
   const index = db.students.findIndex((s: any) => s.studentId.toLowerCase() === studentId.toLowerCase());
@@ -277,7 +341,8 @@ app.delete('/api/students/:id', (req, res) => {
 });
 
 // Teachers List & Create / Delete
-app.get('/api/teachers', (req, res) => {
+app.get('/api/teachers', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   const teachers = db.users
     .filter((u: any) => u.role === 'TEACHER')
@@ -285,7 +350,8 @@ app.get('/api/teachers', (req, res) => {
   res.json(teachers);
 });
 
-app.post('/api/teachers', (req, res) => {
+app.post('/api/teachers', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const { username, password, fullName, email, department } = req.body;
   if (!username || !password || !fullName) {
     return res.status(400).json({ error: 'Username, password, and full name are required' });
@@ -318,7 +384,8 @@ app.post('/api/teachers', (req, res) => {
   res.status(201).json(safeTeacher);
 });
 
-app.delete('/api/teachers/:id', (req, res) => {
+app.delete('/api/teachers/:id', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const teacherId = req.params.id;
   const db = getDB();
   const index = db.users.findIndex((u: any) => u.id === teacherId && u.role === 'TEACHER');
@@ -335,11 +402,16 @@ app.delete('/api/teachers/:id', (req, res) => {
 });
 
 // Attendance Log & Mark
-app.get('/api/attendance', (req, res) => {
+app.get('/api/attendance', requireAuth, (req, res) => {
   const db = getDB();
   let records = db.attendance;
+  const user = (req as any).user;
 
-  const { studentId, department, date, month, year, status, search } = req.query;
+  let { studentId, department, date, month, year, status, search } = req.query;
+
+  if (user.role === 'STUDENT') {
+    studentId = user.id; // Enforce scoping
+  }
 
   if (studentId) {
     records = records.filter((r: any) => r.studentId.toLowerCase() === String(studentId).toLowerCase());
@@ -371,7 +443,8 @@ app.get('/api/attendance', (req, res) => {
   res.json(records);
 });
 
-app.post('/api/attendance/mark', (req, res) => {
+app.post('/api/attendance/mark', requireAuth, (req, res) => {
+  if ((req as any).user.role === 'STUDENT') return res.status(403).json({ error: 'Forbidden' });
   const { studentId, confidence, deviceId, capturedImage } = req.body;
   if (!studentId) {
     return res.status(400).json({ error: 'Student ID is required' });
@@ -425,18 +498,20 @@ app.post('/api/attendance/mark', (req, res) => {
 });
 
 // Logs Endpoint
-app.get('/api/logs', (req, res) => {
+app.get('/api/logs', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   res.json(db.auditLogs);
 });
 
 // Settings Get & Post
-app.get('/api/settings', (req, res) => {
+app.get('/api/settings', requireAuth, (req, res) => {
   const db = getDB();
   res.json(db.settings);
 });
 
-app.post('/api/settings', (req, res) => {
+app.post('/api/settings', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   db.settings = { ...db.settings, ...req.body };
   addLog(db, 'admin', 'ADMIN', 'SETTINGS_UPDATED', 'Updated system configurations', req.ip);
@@ -446,7 +521,8 @@ app.post('/api/settings', (req, res) => {
 });
 
 // Backup & Restore Routes
-app.get('/api/database/backup', (req, res) => {
+app.get('/api/database/backup', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   const exportData = {
     exportDate: new Date().toISOString(),
@@ -459,7 +535,8 @@ app.get('/api/database/backup', (req, res) => {
   res.send(JSON.stringify(exportData, null, 2));
 });
 
-app.post('/api/database/restore', (req, res) => {
+app.post('/api/database/restore', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
   const { restoredData } = req.body;
   if (!restoredData || !restoredData.users || !restoredData.students || !restoredData.attendance) {
     return res.status(400).json({ error: 'Invalid database backup payload format' });
@@ -467,6 +544,23 @@ app.post('/api/database/restore', (req, res) => {
 
   saveDB(restoredData);
   res.json({ success: true, message: 'Database state restored successfully!' });
+});
+
+
+// Mock Student Endpoints
+app.get('/api/leave-requests', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'STUDENT') return res.status(403).json({ error: 'Forbidden' });
+  res.json([]);
+});
+app.post('/api/leave-requests', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'STUDENT') return res.status(403).json({ error: 'Forbidden' });
+  res.status(201).json({ success: true, message: 'Request submitted successfully' });
+});
+app.get('/api/notifications', requireAuth, (req, res) => {
+  if ((req as any).user.role !== 'STUDENT') return res.status(403).json({ error: 'Forbidden' });
+  res.json([
+    { id: 'n1', studentId: (req as any).user.id, title: 'Welcome', message: 'Welcome to SmartFace Portal!', type: 'INFO', createdAt: new Date().toISOString(), read: false }
+  ]);
 });
 
 // Start Server and mount Vite

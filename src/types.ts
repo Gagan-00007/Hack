@@ -1,4 +1,23 @@
-export type UserRole = 'ADMIN' | 'TEACHER';
+export type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
+
+export interface LeaveRequest {
+  id: string;
+  studentId: string;
+  date: string;
+  reason: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  studentId: string;
+  title: string;
+  message: string;
+  type: 'WARNING' | 'INFO' | 'SUCCESS';
+  createdAt: string;
+  read: boolean;
+}
 
 export interface User {
   id: string;

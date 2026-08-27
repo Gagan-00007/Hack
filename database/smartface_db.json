@@ -22,9 +22,51 @@
       "createdAt": "2026-07-30T12:14:38.198Z"
     }
   ],
-  "students": [],
-  "attendance": [],
+  "students": [
+    {
+      "studentId": "STU123",
+      "fullName": "Test Student 1",
+      "department": "Computer Science",
+      "status": "ACTIVE"
+    },
+    {
+      "studentId": "STU456",
+      "fullName": "Test Student 2",
+      "department": "Computer Science",
+      "status": "ACTIVE"
+    }
+  ],
+  "attendance": [
+    {
+      "id": "att1",
+      "studentId": "STU123",
+      "studentName": "Test Student 1",
+      "department": "Computer Science",
+      "date": "2023-10-10",
+      "time": "09:00:00",
+      "status": "PRESENT"
+    },
+    {
+      "id": "att2",
+      "studentId": "STU456",
+      "studentName": "Test Student 2",
+      "department": "Computer Science",
+      "date": "2023-10-10",
+      "time": "09:00:00",
+      "status": "PRESENT"
+    }
+  ],
   "auditLogs": [
+    {
+      "id": "log_1787847915102_oi1a",
+      "timestamp": "2026-08-27T16:25:15.102Z",
+      "userId": "STU123",
+      "username": "STU123",
+      "role": "STUDENT",
+      "action": "LOGIN_SUCCESS",
+      "details": "User Test Student 1 logged in successfully",
+      "ipAddress": "127.0.0.1"
+    },
     {
       "id": "log_1787843347801_hkby",
       "timestamp": "2026-08-27T15:09:07.801Z",

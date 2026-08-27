@@ -18,12 +18,17 @@ import {
   Clock,
 } from 'lucide-react';
 
+import { StudentDashboard } from './StudentDashboard';
+
 interface DashboardProps {
   currentUser: User | null;
   onNavigate: (tab: any) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onNavigate }) => {
+  if (currentUser?.role === 'STUDENT') {
+    return <StudentDashboard currentUser={currentUser} />;
+  }
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
