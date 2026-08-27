@@ -15,11 +15,15 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-export const Recognition: React.FC = () => {
+export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [recentLogs, setRecentLogs] = useState<AttendanceRecord[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
+  
+  // Kiosk Device Tracking
+  const [deviceName, setDeviceName] = useState<string>('');
+  const [deviceConfigured, setDeviceConfigured] = useState<boolean>(false);
 
   // Recognition outcome state
   const [activeDetection, setActiveDetection] = useState<{
@@ -181,7 +185,7 @@ export const Recognition: React.FC = () => {
           studentId,
           confidence,
           capturedImage,
-          deviceId: 'Main Kiosk Terminal #1',
+          deviceId: deviceName || 'Unknown Kiosk',
         }),
       });
 
@@ -220,14 +224,65 @@ export const Recognition: React.FC = () => {
     }
   };
 
+  if (!deviceConfigured) {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <Camera className="w-8 h-8" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-center text-slate-800 dark:text-white mb-2">Configure Kiosk</h2>
+          <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-8">
+            Please enter a location or device tag so attendance scans can be tracked to this physical device.
+          </p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Device / Location Name
+              </label>
+              <input
+                type="text"
+                value={deviceName}
+                onChange={(e) => setDeviceName(e.target.value)}
+                placeholder="e.g. Main Gate, Library Entrance, Phone 1"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white"
+                autoFocus
+              />
+            </div>
+            
+            <button
+              onClick={() => deviceName.trim() && setDeviceConfigured(true)}
+              disabled={!deviceName.trim()}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Initialize Scanner
+            </button>
+            
+            {onClose && (
+               <button
+                 onClick={onClose}
+                 className="w-full py-3 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-sm transition-colors"
+               >
+                 Cancel & Return to Dashboard
+               </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 pb-12">
+    <div className="flex flex-col min-h-screen p-4 sm:p-6 lg:p-8 space-y-6">
       {/* Title Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
             <Camera className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span>Real-Time Biometric Facial Recognition Kiosk</span>
+            <span>{deviceName} — Real-Time Biometric Kiosk</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Continuous webcam facial scanner with real-time vector matching and duplicate prevention.
@@ -259,6 +314,15 @@ export const Recognition: React.FC = () => {
               <span>Pause Kiosk Scanner</span>
             </button>
           )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="flex items-center space-x-2 px-5 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm rounded-xl shadow-sm transition-all sm:ml-4 sm:border-l sm:border-slate-300 sm:dark:border-slate-700"
+              >
+                <span>Exit Kiosk Mode</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

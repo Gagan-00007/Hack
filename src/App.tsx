@@ -59,6 +59,15 @@ export default function App() {
     return <LoginModal onLoginSuccess={handleLoginSuccess} />;
   }
 
+  // Standalone Kiosk Mode
+  if (activeTab === 'recognition') {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+        <Recognition onClose={() => setActiveTab('dashboard')} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       {/* Top Navigation Header */}
@@ -86,8 +95,6 @@ export default function App() {
           {activeTab === 'dashboard' && (
             <Dashboard currentUser={currentUser} onNavigate={(tab) => setActiveTab(tab)} />
           )}
-
-          {activeTab === 'recognition' && <Recognition />}
 
           {activeTab === 'registration' && currentUser.role === 'ADMIN' && <Registration />}
 
