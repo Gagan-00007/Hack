@@ -19,7 +19,8 @@
       "email": "ssmith@university.edu",
       "role": "TEACHER",
       "department": "Computer Science",
-      "createdAt": "2026-07-30T12:14:38.198Z"
+      "createdAt": "2026-07-30T12:14:38.198Z",
+      "lastLogin": "2026-08-27T16:27:56.918Z"
     }
   ],
   "students": [
@@ -57,6 +58,56 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "log_1787848151679_vanb",
+      "timestamp": "2026-08-27T16:29:11.679Z",
+      "userId": "STU123",
+      "username": "STU123",
+      "role": "STUDENT",
+      "action": "LOGIN_SUCCESS",
+      "details": "User Test Student 1 logged in successfully",
+      "ipAddress": "127.0.0.1"
+    },
+    {
+      "id": "log_1787848076918_kifs",
+      "timestamp": "2026-08-27T16:27:56.918Z",
+      "userId": "teacher_smith",
+      "username": "teacher_smith",
+      "role": "TEACHER",
+      "action": "LOGIN_SUCCESS",
+      "details": "User Prof. Sarah Smith logged in successfully",
+      "ipAddress": "127.0.0.1"
+    },
+    {
+      "id": "log_1787848072954_42xq",
+      "timestamp": "2026-08-27T16:27:52.954Z",
+      "userId": "student_alex",
+      "username": "student_alex",
+      "role": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "details": "Failed login attempt for username: student_alex",
+      "ipAddress": "127.0.0.1"
+    },
+    {
+      "id": "log_1787848056374_r02o",
+      "timestamp": "2026-08-27T16:27:36.374Z",
+      "userId": "student_alex",
+      "username": "student_alex",
+      "role": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "details": "Failed login attempt for username: student_alex",
+      "ipAddress": "127.0.0.1"
+    },
+    {
+      "id": "log_1787848053254_a8ws",
+      "timestamp": "2026-08-27T16:27:33.254Z",
+      "userId": "student_alex",
+      "username": "student_alex",
+      "role": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "details": "Failed login attempt for username: student_alex",
+      "ipAddress": "127.0.0.1"
+    },
     {
       "id": "log_1787847915102_oi1a",
       "timestamp": "2026-08-27T16:25:15.102Z",

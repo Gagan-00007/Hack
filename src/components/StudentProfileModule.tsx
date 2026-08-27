@@ -57,8 +57,9 @@ export const StudentProfileModule: React.FC = () => {
           
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white">{profile.fullName}</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{profile.studentId} • {profile.department}</p>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">Name: {profile.fullName}</h2>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 mt-1">Roll Number: {profile.studentId}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Department: {profile.department}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -78,11 +79,11 @@ export const StudentProfileModule: React.FC = () => {
 
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                If the kiosk frequently fails to recognize you, you can request a re-enrollment from your department admin.
+                If the kiosk frequently fails to recognize you, or if you haven't uploaded a face yet, you can add your face data to the system here.
               </p>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-bold rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white dark:bg-blue-600 dark:text-white text-sm font-bold rounded-xl hover:bg-blue-500 transition-colors shadow-md">
                 <Camera className="w-4 h-4" />
-                Request Re-Enrollment
+                Upload Face to System
               </button>
             </div>
           </div>

@@ -20,11 +20,7 @@ export const StudentDashboard: React.FC<{ currentUser: User }> = ({ currentUser 
     fetchStats();
   }, []);
 
-  const schedule = [
-    { time: '09:00 AM', subject: 'Data Structures & Algorithms', room: 'Room 302', status: 'completed' },
-    { time: '11:30 AM', subject: 'Database Management Systems', room: 'Lab 4', status: 'upcoming' },
-    { time: '02:00 PM', subject: 'Software Engineering', room: 'Room 105', status: 'upcoming' },
-  ];
+
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -68,35 +64,6 @@ export const StudentDashboard: React.FC<{ currentUser: User }> = ({ currentUser 
         </div>
       </div>
 
-      {/* Schedule */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Clock className="w-5 h-5 text-blue-500" />
-            Today's Schedule
-          </h2>
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
-          {schedule.map((item, idx) => (
-            <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className={`w-2 h-12 rounded-full ${item.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                <div>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-200">{item.subject}</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.time} • {item.room}</p>
-                </div>
-              </div>
-              <div>
-                <span className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-                  item.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                }`}>
-                  {item.status.toUpperCase()}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
