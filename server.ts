@@ -261,6 +261,33 @@ app.get('/api/stats', requireAuth, (req, res) => {
   });
 });
 
+// Fetch System Settings
+app.get('/api/settings', requireAuth, (req, res) => {
+  const db = getDB();
+  res.json(db.settings || {});
+});
+
+// Update System Settings
+app.post('/api/settings', requireAuth, (req, res) => {
+  const db = getDB();
+  db.settings = { ...db.settings, ...req.body };
+  saveDB(db);
+  
+  // Log the action
+  db.auditLogs.unshift({
+    id: 'log_' + Date.now(),
+    timestamp: new Date().toISOString(),
+    username: (req as any).user.username,
+    role: (req as any).user.role,
+    action: 'UPDATE_SETTINGS',
+    details: 'System configuration updated',
+    ipAddress: req.ip || '127.0.0.1'
+  });
+  saveDB(db);
+  
+  res.json({ message: 'Settings updated successfully', settings: db.settings });
+});
+
 // Students List & Create / Edit / Delete
 app.get('/api/students/me', requireAuth, (req, res) => {
   const db = getDB();

@@ -332,7 +332,6 @@ export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
             )}
           </div>
         </div>
-      </div>
 
       {/* Main Kiosk Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
