@@ -20,6 +20,7 @@ export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
   const [recentLogs, setRecentLogs] = useState<AttendanceRecord[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
+  const [confidenceThreshold, setConfidenceThreshold] = useState<number>(65);
   
   // Kiosk Device Tracking
   const [deviceName, setDeviceName] = useState<string>('');
@@ -53,9 +54,10 @@ export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
 
   const fetchStudentsAndLogs = async () => {
     try {
-      const [stuRes, attRes] = await Promise.all([
+      const [stuRes, attRes, setRes] = await Promise.all([
         fetch('/api/students'),
         fetch('/api/attendance'),
+        fetch('/api/settings'),
       ]);
 
       if (stuRes.ok) {
@@ -65,6 +67,12 @@ export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
       if (attRes.ok) {
         const attData = await attRes.json();
         setRecentLogs(attData.slice(0, 15));
+      }
+      if (setRes.ok) {
+        const setData = await setRes.json();
+        if (setData.strictModeConfidence) {
+          setConfidenceThreshold(setData.strictModeConfidence);
+        }
       }
     } catch (err) {
       console.error('Failed to load students for face recognition:', err);
@@ -117,7 +125,7 @@ export const Recognition: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
 
             if (result && result.descriptor) {
               // Match against registered student encodings
-              const match = matchFaceDescriptor(result.descriptor, students, 65);
+              const match = matchFaceDescriptor(result.descriptor, students, confidenceThreshold);
 
               if (match) {
                 // RECOGNISED STUDENT -> Draw GREEN Bounding Box

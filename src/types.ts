@@ -88,6 +88,12 @@ export interface SystemSettings {
   kioskDeviceName: string;
   departmentList: string[];
   systemVersion: string;
+  livenessSensitivity: number;
+  lateArrivalCutoff: string;
+  autoMarkAbsentTime: string;
+  lowAttendanceWarningThreshold: number;
+  dataRetentionDays: number;
+  registeredKiosks: { id: string; name: string; status: 'ONLINE' | 'OFFLINE'; lastPing: string }[];
 }
 
 export interface DashboardStats {

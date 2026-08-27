@@ -96,7 +96,7 @@ export default function App() {
             <Dashboard currentUser={currentUser} onNavigate={(tab) => setActiveTab(tab)} />
           )}
 
-          {activeTab === 'registration' && currentUser.role === 'ADMIN' && <Registration />}
+          {activeTab === 'registration' && ['ADMIN', 'TEACHER'].includes(currentUser.role) && <Registration />}
 
           {activeTab === 'students' && (
             <StudentManagement
@@ -119,7 +119,7 @@ export default function App() {
           
           {activeTab === 'requests' && currentUser.role === 'STUDENT' && <LeaveRequestModule />}
 
-          {activeTab === 'settings' && currentUser.role === 'ADMIN' && (
+          {activeTab === 'settings' && ['ADMIN', 'TEACHER'].includes(currentUser.role) && (
             <SettingsModule
               currentUser={currentUser}
               darkMode={darkMode}

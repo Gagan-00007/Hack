@@ -76,6 +76,14 @@ const initialData = {
       'Information Technology',
     ],
     systemVersion: 'SmartFace AI Enterprise v2.4.0',
+    livenessSensitivity: 80,
+    lateArrivalCutoff: '09:00',
+    autoMarkAbsentTime: '10:00',
+    lowAttendanceWarningThreshold: 75,
+    dataRetentionDays: 30,
+    registeredKiosks: [
+      { id: 'kiosk-1', name: 'Main Entrance Kiosk', status: 'ONLINE', lastPing: new Date().toISOString() }
+    ],
   },
 };
 
@@ -471,9 +479,13 @@ app.post('/api/attendance/mark', requireAuth, (req, res) => {
     });
   }
 
-  // Determine status (Late if after 09:00 AM)
-  const hour = new Date().getHours();
-  const status = hour >= 9 ? 'LATE' : 'PRESENT';
+  // Determine status based on dynamic settings
+  const cutoffStr = db.settings.lateArrivalCutoff || '09:00';
+  const cutoffHour = parseInt(cutoffStr.split(':')[0]) || 9;
+  const cutoffMin = parseInt(cutoffStr.split(':')[1]) || 0;
+  const now = new Date();
+  const isLate = now.getHours() > cutoffHour || (now.getHours() === cutoffHour && now.getMinutes() >= cutoffMin);
+  const status = isLate ? 'LATE' : 'PRESENT';
 
   const newRecord = {
     id: 'att_' + Date.now(),

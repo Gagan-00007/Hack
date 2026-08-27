@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuditLog, SystemSettings, User } from '../types';
+import { Clock, Sliders, Bell, HardDrive, Smartphone } from 'lucide-react';
 import {
   Settings,
   Database,
@@ -130,6 +131,29 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
     }
   };
 
+
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'System configuration updated successfully!' });
+      } else {
+        setMessage({ type: 'error', text: 'Failed to update configuration.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Server error while saving settings.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto">
       {/* Title Bar */}
@@ -157,6 +181,172 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             Dismiss
           </button>
         </div>
+      )}
+
+      
+      {settings && (
+        <>
+          {/* Section: Biometric Recognition Settings */}
+          <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Biometric Recognition Settings</span>
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Liveness Detection Sensitivity ({settings.livenessSensitivity}%)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={settings.livenessSensitivity || 80}
+                  onChange={(e) => setSettings({ ...settings, livenessSensitivity: parseInt(e.target.value) })}
+                  className="w-full accent-blue-600"
+                />
+                <p className="text-xs text-slate-500 mt-1">Lower values may accept spoofs; higher values may reject real faces.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Face-Match Confidence Threshold ({settings.strictModeConfidence}%)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={settings.strictModeConfidence || 70}
+                  onChange={(e) => setSettings({ ...settings, strictModeConfidence: parseInt(e.target.value) })}
+                  className="w-full accent-emerald-600"
+                />
+                <p className="text-xs text-slate-500 mt-1">Minimum similarity required to log attendance.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Attendance & Time Rules */}
+          <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <Clock className="w-4 h-4 text-amber-500" />
+              <span>Attendance & Time Rules</span>
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Late Arrival Cutoff Time
+                </label>
+                <input
+                  type="time"
+                  value={settings.lateArrivalCutoff || '09:00'}
+                  onChange={(e) => setSettings({ ...settings, lateArrivalCutoff: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Auto-Mark Absent Time
+                </label>
+                <input
+                  type="time"
+                  value={settings.autoMarkAbsentTime || '10:00'}
+                  onChange={(e) => setSettings({ ...settings, autoMarkAbsentTime: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Data Retention & Alerts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <Bell className="w-4 h-4 text-rose-500" />
+                <span>Alerts & Notifications</span>
+              </h3>
+              
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Low Attendance Warning Threshold (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={settings.lowAttendanceWarningThreshold || 75}
+                  onChange={(e) => setSettings({ ...settings, lowAttendanceWarningThreshold: parseInt(e.target.value) })}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <HardDrive className="w-4 h-4 text-purple-500" />
+                <span>Data Retention</span>
+              </h3>
+              
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Log & Photo Retention Period
+                </label>
+                <select
+                  value={settings.dataRetentionDays || 30}
+                  onChange={(e) => setSettings({ ...settings, dataRetentionDays: parseInt(e.target.value) })}
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                >
+                  <option value={7}>7 Days</option>
+                  <option value={30}>30 Days</option>
+                  <option value={90}>90 Days</option>
+                  <option value={365}>1 Year</option>
+                  <option value={9999}>Forever</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Kiosk Management */}
+          <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <Smartphone className="w-4 h-4 text-indigo-500" />
+              <span>Registered Kiosks</span>
+            </h3>
+            
+            <div className="space-y-3">
+              {settings.registeredKiosks?.map((kiosk) => (
+                <div key={kiosk.id} className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                      <Smartphone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">{kiosk.name}</div>
+                      <div className="text-xs text-slate-500">ID: {kiosk.id}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{kiosk.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={handleSaveSettings}
+              disabled={loading}
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save Configuration'}
+            </button>
+          </div>
+        </>
       )}
 
       {/* Section 1: Database Backup & Restore */}
