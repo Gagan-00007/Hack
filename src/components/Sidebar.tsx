@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'registration',
       label: 'Register Student',
       icon: UserPlus,
-      roles: ['ADMIN'],
+      roles: ['ADMIN', 'TEACHER'],
     },
     {
       id: 'students',
@@ -118,9 +118,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'settings',
-      label: 'System & Backup',
+      label: 'System Settings',
       icon: Settings,
-      roles: ['ADMIN'],
+      roles: ['ADMIN', 'TEACHER'],
     },
   ];
 

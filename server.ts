@@ -268,7 +268,7 @@ app.get('/api/students', requireAuth, (req, res) => {
 });
 
 app.post('/api/students', requireAuth, (req, res) => {
-  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+  if (!['ADMIN', 'TEACHER'].includes((req as any).user.role)) return res.status(403).json({ error: 'Forbidden' });
   const { studentId, fullName, department, year, section, rollNumber, email, phoneNumber, faceEncodings, datasetImages } = req.body;
 
   if (!studentId || !fullName || !department) {
@@ -307,7 +307,7 @@ app.post('/api/students', requireAuth, (req, res) => {
 });
 
 app.put('/api/students/:id', requireAuth, (req, res) => {
-  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+  if (!['ADMIN', 'TEACHER'].includes((req as any).user.role)) return res.status(403).json({ error: 'Forbidden' });
   const studentId = req.params.id;
   const db = getDB();
   const index = db.students.findIndex((s: any) => s.studentId.toLowerCase() === studentId.toLowerCase());
@@ -324,7 +324,7 @@ app.put('/api/students/:id', requireAuth, (req, res) => {
 });
 
 app.delete('/api/students/:id', requireAuth, (req, res) => {
-  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+  if (!['ADMIN', 'TEACHER'].includes((req as any).user.role)) return res.status(403).json({ error: 'Forbidden' });
   const studentId = req.params.id;
   const db = getDB();
   const index = db.students.findIndex((s: any) => s.studentId.toLowerCase() === studentId.toLowerCase());
@@ -511,7 +511,7 @@ app.get('/api/settings', requireAuth, (req, res) => {
 });
 
 app.post('/api/settings', requireAuth, (req, res) => {
-  if ((req as any).user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+  if (!['ADMIN', 'TEACHER'].includes((req as any).user.role)) return res.status(403).json({ error: 'Forbidden' });
   const db = getDB();
   db.settings = { ...db.settings, ...req.body };
   addLog(db, 'admin', 'ADMIN', 'SETTINGS_UPDATED', 'Updated system configurations', req.ip);
